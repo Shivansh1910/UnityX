@@ -1,0 +1,76 @@
+.modalBody {
+  background: #000;
+  border-radius: 16px;
+}
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.12px;
+  color: white;
+}
+.modalHead {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #2a2a2a;
+
+  @media only screen and (max-width: $mobileScreen) {
+    font-size: 16px;
+  }
+}
+.modelHeading{
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+.modelSubheading{
+  font-size: 16px;
+  font-weight: 400;
+  color: #B1B8C1;
+  margin-top: 16px;
+}
+.modalSaveBtn {
+  color: #48a8f8;
+  font-size: 18px;
+  padding: 0;
+  font-family: "DM Sans", sans-serif !important;
+  position: absolute; 
+  right: 20px; 
+  @media only screen and (max-width: $mobileScreen) {
+    font-size: 16px;
+  }
+}
+.modalContainer {
+  padding: 20px 0;
+  @media only screen and (max-width: $mobileScreen) {
+    padding: 0;
+  }
+  
+}
+
+.mobileModalBody{
+  @media only screen and (max-width: $mobileScreen) {
+    width:100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+.modalInnerContent {
+  @media only screen and (max-width: $mobileScreen) {
+    padding: 0 !important;
+  }
+}
+
+.modalHalf {
+  @media only screen and (max-width: $mobileScreen) {
+    width: calc(100% - 24px);
+    height: 470px;
+    margin: 12px;
+    border-radius: 12px;
+    position: absolute;
+    bottom: 0;
+  }
+}

@@ -1,0 +1,19 @@
+.root {
+  background-color: #EEEEEE;
+  width: 336px;
+  height: 60px;
+  display: flex;
+  justify-content: space-around;
+  align-content: center;
+}
+
+.root .links {
+  display: flex;
+  justify-content: center;
+  width: 40px;
+}
+
+.root .links .active {
+  background-color: #000000;
+}
+
