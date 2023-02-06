@@ -14,6 +14,7 @@ import { MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import Compose, { IComposeProps } from "src/components/compose";
 import NavBar from "src/components/layout/navbar/navbar";
+import { SocketProvider } from "src/server/socket";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -74,11 +75,12 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     [Hydrate, { state: pageProps.dehydratedState }],
   ];
 
-  // return <Component {...pageProps} />;
   return (
     <Compose providers={providers}>
-      {/* {navBarVisible && <NavBar />} */}
-      <Component {...pageProps} />
+      <SocketProvider>
+        {/* {navBarVisible && <NavBar />} */}
+        <Component {...pageProps} />
+      </SocketProvider>
     </Compose>
   );
 }

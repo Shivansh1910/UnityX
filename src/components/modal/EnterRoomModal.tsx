@@ -7,6 +7,7 @@ import ModalCircleBtn from "./ModalCircleBtn";
 import { useForm, zodResolver } from "@mantine/form";
 import { participantSchema } from "../form/participant";
 import useIParticipantStore from "src/stores/participant.store";
+import { addRoom, signin } from "src/server/firebase";
 
 export interface IClaimYourAndIdRef {
   showModal: boolean;
@@ -19,6 +20,7 @@ const EnterRoomModal = (props: IClaimYourAndIdRef) => {
   const email = useIParticipantStore((state) => state.email);
   const setName = useIParticipantStore((state) => state.setName);
   const setEmail = useIParticipantStore((state) => state.setEmail);
+  const room = useIParticipantStore((state) => state.room);
 
   const { setModal, showModal } = props;
   const closeModal = () => {
@@ -36,10 +38,23 @@ const EnterRoomModal = (props: IClaimYourAndIdRef) => {
   const handleSubmit = (data: any) => {
     setName(data.name);
     setEmail(data.email);
-    closeModal();
+    if (room) {
+      addRoom(room, data.name, data.email);
+      closeModal();
+    }
   };
 
-  useEffect(() => {}, []);
+  const handleSignIn = async () => {
+    const user = await signin();
+    setEmail(user?.email);
+    setName(user?.displayName);
+    if (room) {
+      addRoom(room, user?.email, user?.displayName);
+      closeModal();
+    }
+  }
+
+  useEffect(() => { }, []);
 
   return (
     <>
@@ -82,14 +97,13 @@ const EnterRoomModal = (props: IClaimYourAndIdRef) => {
           <Box className={classes.root}>
             <Box className={classes.cardDesign}>
               <p className={classes.detail}>Welcome ✨</p>
-              <Box
-                sx={{
-                  margin: "auto",
-                  width: 271,
-                  maxWidth: "100%",
-                }}
-              ></Box>
             </Box>
+            <Box style={{ textAlign: 'center', marginTop: '20px' }}>
+              <Button className={classes.loginWithGoogleBtn} onClick={handleSignIn}>Sign in with Google</Button>
+            </Box>
+            <p className={classes.detail} style={{ marginTop: '12px', fontSize: '15px', fontWeight: 400 }}>
+              OR
+            </p>
             <form onSubmit={form.onSubmit(handleSubmit)}>
               <TextInput
                 label="Name"

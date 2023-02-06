@@ -6,21 +6,22 @@ import classes from "src/styles/enterRoomModal.module.css";
 import ModalCircleBtn from "./ModalCircleBtn";
 import { useForm, zodResolver } from "@mantine/form";
 import { participantSchema } from "../form/participant";
-import useIParticipantStore from "src/stores/participant.store";
-import { signin } from "src/server/firebase";
+import { addRoom, signin } from "src/server/firebase";
+import { useRouter } from "next/router";
 
 export interface IClaimYourAndIdRef {
   showModal: boolean;
   setModal: () => void;
   isBackAllowed?: boolean;
+  name: string | null;
+  setName: (name: string | null) => void;
+  email: string | null;
+  setEmail: (email: string | null) => void;
+  room: string | null;
 }
 
 const SignInModal = (props: IClaimYourAndIdRef) => {
-  const name = useIParticipantStore((state) => state.name);
-  const email = useIParticipantStore((state) => state.email);
-  const setName = useIParticipantStore((state) => state.setName);
-  const setEmail = useIParticipantStore((state) => state.setEmail);
-
+  const router = useRouter();
   const { setModal, showModal } = props;
   const closeModal = () => {
     setModal();
@@ -29,24 +30,31 @@ const SignInModal = (props: IClaimYourAndIdRef) => {
   const form = useForm({
     validate: zodResolver(participantSchema),
     initialValues: {
-      name: name,
-      email: email,
+      name: props.name,
+      email: props.email,
     },
   });
 
   const handleSubmit = (data: any) => {
-    setName(data.name);
-    setEmail(data.email);
-    closeModal();
+    props.setName(data.name);
+    props.setEmail(data.email);
+    if (props.room) {
+      addRoom(props.room, data.name, data.email);
+      closeModal();
+      router.push("/meet/" + props.room);
+    }
   };
 
   const handleSignIn = async () => {
     const user = await signin();
-    setEmail(user?.email ?? "");
-    setName(user?.displayName ?? "");
+    props.setEmail(user?.email);
+    props.setName(user?.displayName);
+    if (props.room) {
+      addRoom(props.room, user?.email, user?.displayName);
+      closeModal();
+      router.push("/meet/" + props.room);
+    }
   };
-
-  useEffect(() => {}, []);
 
   return (
     <>
@@ -90,20 +98,23 @@ const SignInModal = (props: IClaimYourAndIdRef) => {
             <Box className={classes.cardDesign}>
               <p className={classes.detail}>Choose Sign In Method</p>
             </Box>
-            <Box>
-              <Button onClick={handleSignIn}>Sign In with Google</Button>
+            <Box style={{ textAlign: 'center', marginTop: '20px' }}>
+              <Button className={classes.loginWithGoogleBtn} onClick={handleSignIn}>Sign in with Google</Button>
             </Box>
+            <p className={classes.detail} style={{ marginTop: '12px', fontSize: '15px', fontWeight: 400 }}>
+              OR
+            </p>
             <form onSubmit={form.onSubmit(handleSubmit)}>
+              <TextInput
+                label="Name"
+                placeholder="Name"
+                {...form.getInputProps("name")}
+              />
               <TextInput
                 mt="sm"
                 label="Email"
                 placeholder="Email"
                 {...form.getInputProps("email")}
-              />
-              <TextInput
-                label="Name"
-                placeholder="Name"
-                {...form.getInputProps("name")}
               />
 
               <Button mt="md" type="submit">

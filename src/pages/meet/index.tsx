@@ -10,14 +10,11 @@ import {
   TRoomIDForm,
 } from "src/components/form/roomId";
 import { createRoomId } from "src/utils/createRoomId";
-import db, { checkRoomId, dbRef } from "src/server/firebase";
+import db, { addRoom, checkRoomId, dbRef } from "src/server/firebase";
 import { ref, set, onValue, push, child, get } from "firebase/database";
 import { toast } from "src/utils/toast";
 import SignInModal from "src/components/modal/SignInModal";
-
-interface O {
-  [key: string]: any;
-}
+import useIParticipantStore from "src/stores/participant.store";
 
 const MeetWrapper: NextPage<{ doesExist?: boolean }> = ({ doesExist }) => {
   const setNavBarVisible = useUIStore((state) => state.setNavBarVisible);
@@ -36,7 +33,14 @@ const Meet: React.FC = () => {
   const { classes } = useStyles();
 
   const [modalBackAllowed, setModalBackAllowed] = useState(true);
-  const [showSignInModal, setShowSignInModal] = useState(true);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
+  const name = useIParticipantStore((state) => state.name);
+  const setName = useIParticipantStore((state) => state.setName);
+  const email = useIParticipantStore((state) => state.email);
+  const setEmail = useIParticipantStore((state) => state.setEmail);
+  const room = useIParticipantStore((state) => state.room);
+  const setRoom = useIParticipantStore((state) => state.setRoom);
 
   const handleSignInModal = () => {
     setShowSignInModal(!showSignInModal);
@@ -44,15 +48,16 @@ const Meet: React.FC = () => {
 
   const handleClick = async () => {
     const roomId = createRoomId();
-    // const roomRef = ref(db, "rooms/" + "W6JqvgvBE");
-    // const p = await set(ref(db, "rooms/" + "W6JqvgvBE"), {
-    //   partipants: {
-    //     [btoa("email")]: {
-    //       name: "test1",
-    //       email: "test2",
-    //     },
-    //   },
-    // });
+    setRoom(roomId);
+
+    if (!email || !name) {
+      setModalBackAllowed(true);
+      setShowSignInModal(true);
+    }
+    else {
+      addRoom(roomId, name, email);
+    }
+
     // const p = await get(roomRef);
     // const par: O | null = p.toJSON();
     // console.log(par?.partipants);
@@ -79,6 +84,7 @@ const Meet: React.FC = () => {
       if (data === null) {
         toast.error("Room does not exist");
       } else {
+
         router.push("/meet/" + values.roomId);
       }
     });
@@ -98,7 +104,7 @@ const Meet: React.FC = () => {
             </p>
             <form onSubmit={form.onSubmit(handleSubmit)}>
               <Grid>
-                <Grid.Col md={2} lg={2}>
+                <Grid.Col md={2} lg={3}>
                   <Button
                     variant="gradient"
                     gradient={{ from: "indigo", to: "cyan" }}
@@ -107,7 +113,7 @@ const Meet: React.FC = () => {
                     Join a meeting
                   </Button>
                 </Grid.Col>
-                <Grid.Col sm={3} md={3} lg={4}>
+                <Grid.Col sm={3} md={3} lg={5}>
                   <TextInput
                     name="roomId"
                     placeholder="Enter the Meeting Code"
@@ -129,10 +135,15 @@ const Meet: React.FC = () => {
           <Grid.Col md={12} lg={6}></Grid.Col>
         </Grid>
       </Box>
-        <SignInModal
+      <SignInModal
         showModal={showSignInModal}
         setModal={handleSignInModal}
         isBackAllowed={modalBackAllowed}
+        name={name}
+        email={email}
+        setName={setName}
+        setEmail={setEmail}
+        room={room}
       />
     </>
   );
@@ -148,7 +159,7 @@ const useStyles = createStyles({
     color: "#B1B8C1",
     background: "#000",
     border: "none",
-    maxWidth: "400px",
+    maxWidth: "300px",
   },
 });
 

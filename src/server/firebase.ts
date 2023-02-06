@@ -1,13 +1,12 @@
 import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
-import { child, get, getDatabase, push, ref } from "firebase/database";
+import { child, get, getDatabase, push, ref, set } from "firebase/database";
 import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
 } from "firebase/auth";
-import useIParticipantStore from "src/stores/participant.store";
 
 type TAction = "child" | "push";
 
@@ -34,6 +33,22 @@ export const checkRoomId = async (roomId: string) => {
   if (temp) {
     return Object.values(temp).includes(roomId);
   }
+};
+
+export const addRoom = async (roomId: string, email: string | null, name: string | null) => {
+  const roomRef = ref(db, "rooms/" + roomId);
+  if (email && name) {
+    const p = await set(roomRef, {
+      createdOn: Date.now(),
+      partipants: {
+        [btoa(email)]: {
+          name,
+          email,
+        }
+      },
+    });
+  }
+  return roomRef;
 };
 
 export const firebaseRef = (roomId: string, action: TAction) => {
